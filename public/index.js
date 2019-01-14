@@ -20,6 +20,10 @@ const bars = [{
   'pricePerPerson': 80
 }];
 
+
+
+
+
 //list of current booking events
 //useful for ALL steps
 //the time is hour
@@ -72,6 +76,11 @@ const events = [{
     'privateaser': 0
   }
 }];
+
+
+
+
+
 
 //list of actors for payment
 //useful from step 5
@@ -146,6 +155,129 @@ const actors = [{
   }]
 }];
 
+function step1 ()
+{
+console.log("Step 1 : ");
+var booking_price;
+for(var i = 0; i<events.length; i++)
+{
+booking_price = bars[i].pricePerHour * events[i].time + bars[i].pricePerPerson * events[i].persons;
+events[i].price = booking_price;
+console.log(booking_price);
+}
+}
+
+function step2 ()
+{
+console.log("Step 2 : ");
+var nb_pers;
+for(var i = 0; i< events.length;i++)
+{
+nb_pers = events[i].persons;
+
+if(nb_pers>=10 && nb_pers < 20)
+{
+events[i].price = events[i].price*(1-10/100);
+}
+if(nb_pers>=20 && nb_pers < 60)
+{
+events[i].price = events[i].price*(1-30/100);
+}
+if(nb_pers>60)
+{
+events[i].price = events[i].price*(1-50/100);
+}
+//console.log(events[i].price);
+}
+}
+
+function step3 ()
+{
+var commission;
+var insurance;
+var treasury;
+var privateaser;
+console.log("Step 3 :");
+for (var i = 0; i< events.length; i++)
+{
+commission = (events[i].price)*30/100;
+events[i].commission = commission;
+insurance = commission/2;
+events[i].insurance = insurance;
+treasury = events[i].persons;
+events[i].treasury = treasury;
+privateaser = commission - insurance - treasury;
+events[i].privateaser = privateaser;
+//console.log(commission);
+//console.log(insurance);
+console.log(events[i].treasury);
+console.log(events[i].privateaser);
+}
+}
+
+function step4()
+{
+var montant_deductible =0;
+console.log("Step 4 :");
+for (var i = 0; i< events.length; i++)
+{
+if (events[i].options.deductibleReduction == true)
+{
+montant_deductible = events[i].persons;
+events[i].price = events[i].price + montant_deductible;
+events[i].privateaser = events[i].privateaser + montant_deductible;
+}
+console.log(montant_deductible);
+}
+}
+
+function step5()
+{
+for (var i = 0; i< actors.length; i++)
+{
+for(var j = 0; j< events.length; j++)
+{
+for(var k = 0; k<3; k++)// le temps d'atteindre payment length
+{
+if(actors[i].eventId == events[j].id && actors[i].payment[k].who == "booker" && actors[i].payment[k].type == "debit")
+{
+actors[i].payment[k].amount = events[j].price;
+}
+
+if(actors[i].eventId == events[j].id && actors[i].payment[k].who == "bar" && actors[i].payment[k].type == "credit")
+{
+actors[i].payment[k].amount = events[j].price -events[j].commission;
+}
+
+if(actors[i].eventId == events[j].id && actors[i].payment[k].who == "insurance" && actors[i].payment[k].type == "credit")
+{
+actors[i].payment[k].amount = events[j].insurance;
+}
+
+if(actors[i].eventId == events[j].id && actors[i].payment[k].who == "treasury" && actors[i].payment[k].type == "credit")
+{
+actors[i].payment[k].amount = events[j].treasury;
+console.log("dans treasury");
+}
+
+if(actors[i].eventId == events[j].id && actors[i].payment[k].who == "privateaser" && actors[i].payment[k].type == "credit")
+{
+actors[i].payment[k].amount = events[j].privateaser;
+console.log("dans privateaser");
+}
+
+}
+
+}
+
+}
+}
+
+step1();
+step2();
+step3();
+step4();
+step5();
 console.log(bars);
 console.log(events);
 console.log(actors);
